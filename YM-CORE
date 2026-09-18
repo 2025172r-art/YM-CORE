@@ -3,29 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YM-CORE High-Speed Edition</title>
+<title>YM-CORE Precision Edition</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
     :root[data-theme="light"] {
-        --primary-color: #1a365d;
-        --secondary-color: #2b6cb0;
-        --accent-red: #e53e3e;
-        --bg-color: #f7fafc;
-        --chat-bg: #edf2f7;
-        --user-msg-bg: #2b6cb0;
+        --primary-color: #0f172a;
+        --secondary-color: #1e3a8a;
+        --accent-red: #ef4444;
+        --bg-color: #f8fafc;
+        --chat-bg: #f1f5f9;
+        --user-msg-bg: #1e3a8a;
         --bot-msg-bg: #ffffff;
-        --text-color: #2d3748;
+        --text-color: #0f172a;
         --panel-bg: #ffffff;
-        --border-color: #cbd5e0;
+        --border-color: #e2e8f0;
     }
 
     :root[data-theme="dark"] {
-        --primary-color: #0f172a;
+        --primary-color: #020617;
         --secondary-color: #3b82f6;
-        --accent-red: #ef4444;
+        --accent-red: #f87171;
         --bg-color: #020617;
         --chat-bg: #0f172a;
-        --user-msg-bg: #2563eb;
+        --user-msg-bg: #1d4ed8;
         --bot-msg-bg: #1e293b;
         --text-color: #f8fafc;
         --panel-bg: #1e293b;
@@ -33,24 +33,24 @@
     }
 
     * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); margin: 0; padding: 0; display: flex; justify-content: center; height: 100vh; color: var(--text-color); transition: background 0.3s; }
-    .chat-container { width: 100%; max-width: 650px; height: 100vh; background: var(--chat-bg); display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); margin: 0; padding: 0; display: flex; justify-content: center; height: 100vh; color: var(--text-color); transition: background 0.2s; }
+    .chat-container { width: 100%; max-width: 680px; height: 100vh; background: var(--chat-bg); display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
     
-    .header { background: var(--primary-color); color: white; padding: 12px 16px; font-weight: bold; font-size: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
-    .header-controls { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
-    .icon-toggle-btn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-    .icon-toggle-btn:hover { background: rgba(255,255,255,0.3); }
+    .header { background: var(--primary-color); color: white; padding: 12px 18px; font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+    .header-controls { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+    .icon-toggle-btn { background: rgba(255,255,255,0.12); border: none; color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.2s; }
+    .icon-toggle-btn:hover { background: rgba(255,255,255,0.25); }
 
-    .settings-panel { background: var(--panel-bg); padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: none; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem; }
+    .settings-panel { background: var(--panel-bg); padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: none; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.82rem; }
     .settings-panel.active { display: grid; }
     .setting-item { display: flex; flex-direction: column; gap: 4px; }
 
-    .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
-    .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+    .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+    .msg-wrapper { display: flex; flex-direction: column; max-width: 88%; }
     .msg-wrapper.bot { align-self: flex-start; }
     .msg-wrapper.user { align-self: flex-end; }
     
-    .msg { padding: 12px 16px; border-radius: 12px; font-size: 14.5px; line-height: 1.6; word-break: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+    .msg { padding: 12px 16px; border-radius: 12px; font-size: 14.5px; line-height: 1.6; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.06); position: relative; }
     .msg.bot { background: var(--bot-msg-bg); color: var(--text-color); border-top-left-radius: 2px; }
     .msg.user { background: var(--user-msg-bg); color: white; border-top-right-radius: 2px; }
 
@@ -58,35 +58,35 @@
     .msg p:last-child { margin-bottom: 0; }
     
     .msg-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
-    .time-stamp { font-size: 10px; color: #a0aec0; }
+    .time-stamp { font-size: 10px; color: #94a3b8; }
     
-    .speech-btn { background: none; border: none; font-size: 12px; cursor: pointer; color: #718096; padding: 2px 6px; border-radius: 4px; }
+    .speech-btn { background: none; border: none; font-size: 11px; cursor: pointer; color: #64748b; padding: 2px 6px; border-radius: 4px; }
 
-    .file-preview { font-size: 11px; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px; display: none; align-items: center; justify-content: space-between; margin: 0 12px 4px; }
+    .file-preview { font-size: 11px; background: rgba(0,0,0,0.05); padding: 6px 12px; border-radius: 6px; display: none; align-items: center; justify-content: space-between; margin: 0 12px 4px; }
     .file-preview.active { display: flex; }
 
     .input-area { background: var(--panel-bg); padding: 12px; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--border-color); }
     .input-controls { display: flex; gap: 8px; align-items: flex-end; }
     
-    textarea { flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 12px; outline: none; font-size: 14px; resize: none; max-height: 120px; font-family: inherit; background: var(--chat-bg); color: var(--text-color); }
+    textarea { flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; outline: none; font-size: 14px; resize: none; max-height: 120px; font-family: inherit; background: var(--chat-bg); color: var(--text-color); }
     
-    .input-info { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; color: #a0aec0; padding: 0 4px; }
+    .input-info { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; color: #94a3b8; padding: 0 4px; }
 
     .icon-btn { background: var(--chat-bg); color: var(--text-color); border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .icon-btn:hover { background: var(--border-color); }
     
-    .icon-btn.recording { background: var(--accent-red); color: white; border-color: var(--accent-red); animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+    .icon-btn.recording { background: var(--accent-red); color: white; border-color: var(--accent-red); animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-    button.send-btn { background: var(--secondary-color); color: white; border: none; padding: 0 18px; border-radius: 10px; font-weight: bold; cursor: pointer; height: 40px; }
-    button.send-btn:disabled, .icon-btn:disabled { background: var(--border-color); cursor: not-allowed; animation: none; }
+    button.send-btn { background: var(--secondary-color); color: white; border: none; padding: 0 18px; border-radius: 10px; font-weight: bold; cursor: pointer; height: 40px; transition: opacity 0.2s; }
+    button.send-btn:disabled, .icon-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
 </style>
 </head>
 <body>
 
 <div class="chat-container">
     <div class="header">
-        <span>YM-CORE Speed Max</span>
+        <span>YM-CORE High Precision</span>
         <div class="header-controls">
             <button class="icon-toggle-btn" onclick="toggleSettings()" title="設定">⚙️ 設定</button>
             <button class="icon-toggle-btn" onclick="toggleTheme()" title="テーマ切替">🌓</button>
@@ -131,11 +131,13 @@
 let history = [];
 let attachedFileText = "";
 
-// ⭐️ 高速化設定 1: 送信履歴件数を絞ってAPI処理を軽くする (10件 → 3件)
-const MAX_HISTORY = 3; 
-
-// ⭐️ 高速化設定 2: 短文・簡潔回答を促すプロンプト
-const SYSTEM_PROMPT = "あなたの名前は『YM-CORE』です。要点を絞り、極めて簡潔・迅速に回答してください。";
+// 🛡️ 確実性重視の設定パラメータ
+const MAX_HISTORY = 20;       // 履歴保持数を保持して文脈理解力を維持
+const AI_MODEL = "openai";    // 信頼性と精度に優れる標準モデル
+const SYSTEM_PROMPT = `
+あなたの名前は『YM-CORE』です。非常によく考え、客観的かつ論理的で信頼できるAIアシスタントです。
+事実に基づいた正確で確実性の高い回答を提供してください。
+`;
 
 function toggleTheme() {
     const current = document.documentElement.getAttribute("data-theme");
@@ -158,7 +160,7 @@ function handleFileSelect(e) {
 
     const reader = new FileReader();
     reader.onload = function(evt) {
-        attachedFileText = `\n\n【添付ファイル: ${file.name}】\n${evt.target.result}`;
+        attachedFileText = `\n\n【詳細データ: ${file.name}】\n${evt.target.result}`;
         document.getElementById("fileName").innerText = `📎 ${file.name} (${Math.round(file.size/1024)}KB)`;
         document.getElementById("filePreview").classList.add("active");
     };
@@ -172,29 +174,29 @@ function removeFile() {
 }
 
 function saveHistory() {
-    localStorage.setItem("ym_core_speed_history", JSON.stringify(history));
+    localStorage.setItem("ym_core_precision_history", JSON.stringify(history));
 }
 
 function loadHistory() {
-    const saved = localStorage.getItem("ym_core_speed_history");
+    const saved = localStorage.getItem("ym_core_precision_history");
     if (saved) {
         history = JSON.parse(saved);
         history.forEach(item => appendMsg(item.content, item.role === "user" ? "user" : "bot", true, false));
     } else {
-        appendMsg("こんにちは。**YM-CORE High-Speed** です。<br>ストリーミング表示に対応し、回答速度を極限まで引き上げました。", "bot", true, false);
+        appendMsg("こんにちは。**YM-CORE Precision** です。<br>文脈の理解力と回答の正確性を重視した高精度モードで稼働しています。", "bot", true, false);
     }
 }
 
 function clearHistory() {
     if (confirm("会話履歴をクリアしますか？")) {
         history = [];
-        localStorage.removeItem("ym_core_speed_history");
+        localStorage.removeItem("ym_core_precision_history");
         document.getElementById("messages").innerHTML = "";
-        appendMsg("履歴をクリアしました。", "bot", false, false);
+        appendMsg("履歴を初期化しました。", "bot", false, false);
     }
 }
 
-/* 音声認識 & 合成 Engine */
+/* 音声機能 */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let isRecording = false;
@@ -244,7 +246,7 @@ function handleKeyDown(e) {
     }
 }
 
-// ⭐️ 高速化の核心: 1文字ずつ流れるストリーミング受信処理
+/* 確実性を高める検証・処理フェッチ（ストリーミングJSONパース完全対応） */
 async function sendMsg() {
     const input = document.getElementById("userInput");
     let text = input.value.trim();
@@ -262,8 +264,7 @@ async function sendMsg() {
     history.push({ role: "user", content: text });
     saveHistory();
 
-    // 枠を即時生成し、1文字ずつ挿入していく
-    const botMsgId = appendMsg("⚡...", "bot", false, true);
+    const botMsgId = appendMsg("...", "bot typing", false, true);
     const botMsgElem = document.getElementById(botMsgId);
 
     try {
@@ -272,8 +273,8 @@ async function sendMsg() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history.slice(-MAX_HISTORY)],
-                model: "openai",
-                stream: true // ストリーミングモードON
+                model: AI_MODEL,
+                stream: true
             })
         });
 
@@ -282,23 +283,43 @@ async function sendMsg() {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullReply = "";
+        let buffer = "";
+        botMsgElem.classList.remove("typing");
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
-            fullReply += chunk;
-            
-            // マークダウンとしてリアルタイム更新
-            if (typeof marked !== 'undefined') {
-                botMsgElem.innerHTML = marked.parse(fullReply);
-            } else {
-                botMsgElem.textContent = fullReply;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop(); // 分割途中の未完行をバッファに残す
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith(":")) continue;
+
+                let dataStr = trimmed;
+                if (dataStr.startsWith("data: ")) {
+                    dataStr = dataStr.replace(/^data:\s*/, "");
+                }
+
+                if (dataStr === "[DONE]") continue;
+
+                try {
+                    const parsed = JSON.parse(dataStr);
+                    const content = parsed.choices?.[0]?.delta?.content || "";
+                    fullReply += content;
+
+                    botMsgElem.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullReply) : fullReply;
+                    const box = document.getElementById("messages");
+                    box.scrollTop = box.scrollHeight;
+                } catch (e) {
+                    if (!dataStr.startsWith("{")) {
+                        fullReply += dataStr;
+                        botMsgElem.innerHTML = typeof marked !== 'undefined' ? marked.parse(fullReply) : fullReply;
+                    }
+                }
             }
-            
-            const box = document.getElementById("messages");
-            box.scrollTop = box.scrollHeight;
         }
 
         history.push({ role: "assistant", content: fullReply });
@@ -309,7 +330,7 @@ async function sendMsg() {
         }
 
     } catch {
-        botMsgElem.textContent = "エラーが発生しました。もう一度お試しください。";
+        botMsgElem.textContent = "エラーが発生しました。通信環境を確認し再度お試しください。";
     }
 }
 
@@ -326,17 +347,19 @@ function appendMsg(text, type, isMarkdown = false, shouldScroll = true) {
     div.innerHTML = isMarkdown && typeof marked !== 'undefined' ? marked.parse(text) : text;
     wrapper.appendChild(div);
 
-    const footer = document.createElement("div");
-    footer.className = "msg-footer";
-    footer.innerHTML = `<span class="time-stamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
-    if (type.includes("bot")) {
-        const btn = document.createElement("button");
-        btn.className = "speech-btn";
-        btn.innerText = "🔊 読み上げ";
-        btn.onclick = () => speakText(div.innerText);
-        footer.appendChild(btn);
+    if (!type.includes("typing")) {
+        const footer = document.createElement("div");
+        footer.className = "msg-footer";
+        footer.innerHTML = `<span class="time-stamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>`;
+        if (type.includes("bot")) {
+            const btn = document.createElement("button");
+            btn.className = "speech-btn";
+            btn.innerText = "🔊 読み上げ";
+            btn.onclick = () => speakText(div.innerText);
+            footer.appendChild(btn);
+        }
+        wrapper.appendChild(footer);
     }
-    wrapper.appendChild(footer);
 
     box.appendChild(wrapper);
     if (shouldScroll) box.scrollTop = box.scrollHeight;
