@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YM-CORE Full Voice Assistant</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --secondary-color: #2b6cb0;
+        --accent-red: #e53e3e;
+        --bg-color: #f7fafc;
+        --chat-bg: #edf2f7;
+        --user-msg-bg: #2b6cb0;
+        --bot-msg-bg: #ffffff;
+        --text-color: #2d3748;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); margin: 0; padding: 0; display: flex; justify-content: center; height: 100vh; color: var(--text-color); }
+    .chat-container { width: 100%; max-width: 600px; height: 100vh; background: var(--chat-bg); display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    
+    .header { background: var(--primary-color); color: white; padding: 16px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+    .header-controls { display: flex; align-items: center; gap: 8px; }
+    .status-badge { font-size: 0.75rem; background: #319795; color: white; padding: 2px 8px; border-radius: 12px; font-weight: normal; }
+    
+    .tts-toggle { font-size: 0.75rem; color: #e2e8f0; display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+    .tts-toggle input { cursor: pointer; }
+
+    .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
+    .msg-wrapper { display: flex; flex-direction: column; max-width: 85%; }
+    .msg-wrapper.bot { align-self: flex-start; }
+    .msg-wrapper.user { align-self: flex-end; }
+    
+    .msg { padding: 12px 16px; border-radius: 12px; font-size: 14.5px; line-height: 1.6; word-break: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+    .msg.bot { background: var(--bot-msg-bg); color: var(--text-color); border-top-left-radius: 2px; }
+    .msg.user { background: var(--user-msg-bg); color: white; border-top-right-radius: 2px; }
+    .msg.typing { color: #a0aec0; font-style: italic; background: rgba(255,255,255,0.9); }
+
+    .msg p { margin: 0 0 8px 0; }
+    .msg p:last-child { margin-bottom: 0; }
+    
+    .msg-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .time-stamp { font-size: 10px; color: #a0aec0; }
+    
+    .speech-btn { background: none; border: none; font-size: 12px; cursor: pointer; color: #718096; padding: 2px 6px; border-radius: 4px; transition: background 0.2s; }
+    .speech-btn:hover { background: #e2e8f0; color: var(--primary-color); }
+
+    /* 入力エリア */
+    .input-area { background: white; padding: 12px; display: flex; gap: 8px; border-top: 1px solid #e2e8f0; align-items: flex-end; }
+    textarea { flex: 1; padding: 10px 14px; border: 1px solid #cbd5e0; border-radius: 12px; outline: none; font-size: 14px; resize: none; max-height: 120px; font-family: inherit; }
+    
+    /* マイク・送信ボタン */
+    .icon-btn { background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; width: 40px; height: 40px; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .icon-btn:hover { background: #e2e8f0; }
+    
+    /* マイク録音中アニメーション */
+    .icon-btn.recording { background: var(--accent-red); color: white; border-color: var(--accent-red); animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
+    }
+
+    button.send-btn { background: var(--secondary-color); color: white; border: none; padding: 0 18px; border-radius: 10px; font-weight: bold; cursor: pointer; height: 40px; }
+    button.send-btn:disabled, .icon-btn:disabled { background: #cbd5e0; cursor: not-allowed; animation: none; }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">
+        <span>YM-CORE System</span>
+        <div class="header-controls">
+            <label class="tts-toggle" title="AIの返答を自動で音声読み上げします">
+                <input type="checkbox" id="autoTTS" checked> 自動読み上げ
+            </label>
+            <span class="status-badge">VOICE FULL CONNECTED</span>
+        </div>
+    </div>
+    <div id="messages" class="messages">
+        <div class="msg-wrapper bot">
+            <div class="msg bot">こんにちは。<strong>YM-CORE</strong> です。<br>マイクボタン（🎤）を押して話しかけることで、音声入力による会話が可能です。テキスト入力と合わせてご利用ください。</div>
+            <div class="msg-footer">
+                <span class="time-stamp" id="init-time"></span>
+                <button class="speech-btn" onclick="speakText(this.parentElement.previousElementSibling.innerText, this)">🔊 読み上げ</button>
+            </div>
+        </div>
+    </div>
+    <div class="input-area">
+        <textarea id="userInput" rows="1" placeholder="メッセージを入力またはマイクで発話..." onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+        <button id="micBtn" class="icon-btn" onclick="toggleSpeechRecognition()" title="音声入力">🎤</button>
+        <button id="sendBtn" class="send-btn" onclick="sendMsg()">送信</button>
+    </div>
+</div>
+
+<script>
+document.getElementById("init-time").textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+let history = [];
+const MAX_HISTORY = 10;
+
+// 全国主要都市 & 世界主要都市の座標プリセット
+const CITIES = {
+    "札幌": { lat: 43.0642, lon: 141.3469 }, "仙台": { lat: 38.2682, lon: 140.8694 },
+    "東京": { lat: 35.6895, lon: 139.6917 }, "横浜": { lat: 35.4437, lon: 139.6380 },
+    "名古屋": { lat: 35.1815, lon: 136.9066 }, "京都": { lat: 35.0116, lon: 135.7681 },
+    "大阪": { lat: 34.6937, lon: 135.5023 }, "広島": { lat: 34.3853, lon: 132.4553 },
+    "福岡": { lat: 33.5904, lon: 130.4017 }, "那覇": { lat: 26.2124, lon: 127.6809 },
+    "ロンドン": { lat: 51.5074, lon: -0.1278 }, "パリ": { lat: 48.8566, lon: 2.3522 },
+    "ニューヨーク": { lat: 40.7128, lon: -74.0060 }, "ホノルル": { lat: 21.3069, lon: -157.8583 }
+};
+
+function parseWeatherCode(code) {
+    if (code === 0) return "快晴";
+    if (code <= 3) return "晴れ時々曇り、または曇り";
+    if (code <= 48) return "霧";
+    if (code <= 67) return "雨";
+    if (code <= 77) return "雪";
+    if (code <= 82) return "にわか雨";
+    return "悪天候または雷雨";
+}
+
+async function searchCityCoords(query) {
+    try {
+        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=ja&format=json`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+            const loc = data.results[0];
+            return { name: loc.name, lat: loc.latitude, lon: loc.longitude };
+        }
+    } catch { return null; }
+    return null;
+}
+
+async function fetchWeather(cityInput) {
+    let target = CITIES[cityInput];
+    let cityName = cityInput;
+
+    if (!target) {
+        const geoResult = await searchCityCoords(cityInput);
+        if (geoResult) {
+            target = { lat: geoResult.lat, lon: geoResult.lon };
+            cityName = geoResult.name;
+        } else {
+            target = CITIES["東京"];
+            cityName = "東京";
+        }
+    }
+
+    try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${target.lat}&longitude=${target.lon}&current_weather=true&timezone=auto`);
+        const data = await res.json();
+        const cw = data.current_weather;
+        return `${cityName}の現在の天気: ${parseWeatherCode(cw.weathercode)}、気温: ${cw.temperature}度、風速: 秒速${(cw.windspeed / 3.6).toFixed(1)}メートル`;
+    } catch {
+        return `${cityName}の天気データ取得に失敗しました。`;
+    }
+}
+
+async function fetchNews() {
+    try {
+        const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www me.nhk.or.jp/rss/news/cat0.xml');
+        const data = await res.json();
+        if (data.status === 'ok') {
+            const items = data.items.slice(0, 3).map((item, idx) => `${idx + 1}. [${item.title}](${item.link})`).join('\n');
+            return `【最新ニュース3選】\n${items}`;
+        }
+        throw new Error();
+    } catch {
+        return "最新ニュースの取得に失敗しました。";
+    }
+}
+
+/* ===================================================
+   音声認識 (SpeechRecognition STT) エンジン
+   =================================================== */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isRecording = false;
+
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'ja-JP';
+    recognition.interimResults = true; // 認識途中の文字列も表示
+    recognition.continuous = false;    // 発話が終わったら自動停止
+
+    recognition.onstart = () => {
+        isRecording = true;
+        const micBtn = document.getElementById("micBtn");
+        micBtn.classList.add("recording");
+        micBtn.title = "話してください...（クリックで停止）";
+        document.getElementById("userInput").placeholder = "音声認識中... 話しかけてください";
+    };
+
+    recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        const input = document.getElementById("userInput");
+        input.value = transcript;
+        autoResize(input);
+    };
+
+    recognition.onerror = (event) => {
+        console.error("音声認識エラー:", event.error);
+        stopRecording();
+    };
+
+    recognition.onend = () => {
+        stopRecording();
+        const input = document.getElementById("userInput");
+        // 音声認識で文字が入っていれば自動送信
+        if (input.value.trim().length > 0) {
+            sendMsg();
+        }
+    };
+}
+
+function toggleSpeechRecognition() {
+    if (!recognition) {
+        alert("お使いのブラウザは音声認識に対応していません。（Google Chrome、Edge、Safariで動作します）");
+        return;
+    }
+
+    if (isRecording) {
+        recognition.stop();
+    } else {
+        // 発話前に読み上げ音声を停止
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        document.getElementById("userInput").value = "";
+        recognition.start();
+    }
+}
+
+function stopRecording() {
+    isRecording = false;
+    const micBtn = document.getElementById("micBtn");
+    micBtn.classList.remove("recording");
+    micBtn.title = "音声入力";
+    document.getElementById("userInput").placeholder = "メッセージを入力またはマイクで発話...";
+}
+
+/* ===================================================
+   音声合成 (SpeechSynthesis TTS) エンジン
+   =================================================== */
+function speakText(text, btnElement = null) {
+    if (!('speechSynthesis' in window)) return;
+
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        if (btnElement && btnElement.innerText.includes("停止")) {
+            btnElement.innerText = "🔊 読み上げ";
+            return;
+        }
+    }
+
+    const cleanText = text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/[*_~`#\-]/g, '')
+        .replace(/(https?:\/\/[^\s]+)/g, '')
+        .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const jaVoice = voices.find(v => v.lang.includes('ja') || v.lang.includes('JP'));
+    if (jaVoice) utterance.voice = jaVoice;
+
+    if (btnElement) {
+        btnElement.innerText = "⏹️ 停止";
+        utterance.onend = () => { btnElement.innerText = "🔊 読み上げ"; };
+        utterance.onerror = () => { btnElement.innerText = "🔊 読み上げ"; };
+    }
+
+    window.speechSynthesis.speak(utterance);
+}
+
+const SYSTEM_PROMPT = `
+あなたの名前は「YM-CORE」です。プロフェッショナルで誠実なAIアシスタントです。
+ユーザーからの問いかけに対し、適切かつ簡潔に回答してください。
+`;
+
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMsg();
+    }
+}
+
+async function sendMsg() {
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const micBtn = document.getElementById("micBtn");
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (isRecording && recognition) recognition.stop();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+    input.value = "";
+    input.style.height = 'auto';
+    input.disabled = true;
+    sendBtn.disabled = true;
+    micBtn.disabled = true;
+
+    appendMsg(text, "user");
+    history.push({ role: "user", content: text });
+
+    const typingId = appendMsg("思考中...", "bot typing");
+
+    let extraContext = "";
+    if (text.includes("天気") || text.includes("気温") || text.includes("天候")) {
+        let detectedCity = "";
+        for (let city of Object.keys(CITIES)) {
+            if (text.includes(city)) {
+                detectedCity = city;
+                break;
+            }
+        }
+        if (!detectedCity) {
+            detectedCity = text.replace(/の?天気.*|の?気温.*/g, "").trim();
+        }
+        extraContext = "\n【リアルタイム情報】\n" + await fetchWeather(detectedCity);
+    } else if (text.includes("ニュース") || text.includes("出来事")) {
+        extraContext = "\n【リアルタイム情報】\n" + await fetchNews();
+    }
+
+    const contextMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...history.slice(-MAX_HISTORY)
+    ];
+
+    if (extraContext) {
+        contextMessages[contextMessages.length - 1].content += extraContext;
+    }
+
+    try {
+        const response = await fetch("https://text.pollinations.ai/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: contextMessages,
+                model: "openai"
+            })
+        });
+
+        document.getElementById(typingId)?.remove();
+
+        if (response.ok) {
+            const replyText = await response.text();
+            const cleanReply = replyText.trim();
+            const lastMsgId = appendMsg(cleanReply, "bot", true);
+            history.push({ role: "assistant", content: cleanReply });
+
+            const isAutoTTS = document.getElementById("autoTTS").checked;
+            if (isAutoTTS) {
+                const lastMsgElem = document.getElementById(lastMsgId);
+                const btn = lastMsgElem.parentElement.querySelector('.speech-btn');
+                speakText(cleanReply, btn);
+            }
+        } else {
+            throw new Error();
+        }
+    } catch {
+        document.getElementById(typingId)?.remove();
+        appendMsg("申し訳ありません。メッセージの受信に失敗しました。", "bot");
+    } finally {
+        input.disabled = false;
+        sendBtn.disabled = false;
+        micBtn.disabled = false;
+        input.focus();
+    }
+}
+
+function appendMsg(text, type, isMarkdown = false) {
+    const box = document.getElementById("messages");
+    const wrapper = document.createElement("div");
+    wrapper.className = `msg-wrapper ${type.split(' ')[0]}`;
+
+    const div = document.createElement("div");
+    const id = "msg_" + Date.now();
+    div.id = id;
+    div.className = "msg " + type;
+
+    if (isMarkdown && typeof marked !== 'undefined') {
+        div.innerHTML = marked.parse(text);
+    } else {
+        div.textContent = text;
+    }
+
+    wrapper.appendChild(div);
+
+    if (!type.includes("typing")) {
+        const footer = document.createElement("div");
+        footer.className = "msg-footer";
+
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "time-stamp";
+        timeSpan.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        footer.appendChild(timeSpan);
+
+        if (type.includes("bot")) {
+            const speechBtn = document.createElement("button");
+            speechBtn.className = "speech-btn";
+            speechBtn.innerText = "🔊 読み上げ";
+            speechBtn.onclick = function() { speakText(div.innerText, speechBtn); };
+            footer.appendChild(speechBtn);
+        }
+
+        wrapper.appendChild(footer);
+    }
+
+    box.appendChild(wrapper);
+    box.scrollTop = box.scrollHeight;
+    return id;
+}
+</script>
+
+</body>
+</html>
