@@ -210,7 +210,7 @@
     var themes = {
       dark: { bg: '#171923', fg: '#f8fafc', muted: '#aab2c5', line: 'rgba(255,255,255,.13)', btn: 'rgba(255,255,255,.09)', accent: '#a5b4fc' },
       light: { bg: 'rgba(255,255,255,.98)', fg: '#111827', muted: '#596273', line: 'rgba(0,0,0,.15)', btn: 'rgba(0,0,0,.055)', accent: '#4f46e5' },
-      ghost: { bg: 'rgba(24,24,30,.72)', fg: '#fff', muted: 'rgba(255,255,255,.78)', line: 'rgba(255,255,255,.24)', btn: 'rgba(255,255,255,.14)', accent: '#a5b4fc' }
+      ghost: { bg: 'rgba(24,24,30,0.0000005)', fg: '#fff', muted: 'rgba(255,255,255,.78)', line: 'rgba(255,255,255,.24)', btn: 'rgba(255,255,255,.14)', accent: '#a5b4fc' }
     };
     var p = themes[themeName] || themes.dark;
     Object.keys(p).forEach(function (key) { host.style.setProperty('--' + key, p[key]); });
