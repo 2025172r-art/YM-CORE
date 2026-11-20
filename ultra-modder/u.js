@@ -112,6 +112,7 @@
     ':host{--bg:#171923;--fg:#f8fafc;--muted:#aab2c5;--line:rgba(255,255,255,.13);--btn:rgba(255,255,255,.09);--accent:#818cf8;color:var(--fg);font-family:Arial,"Hiragino Sans","Yu Gothic UI",Meiryo,sans-serif;font-size:12px;line-height:1.45}',
     '*,*::before,*::after{box-sizing:border-box}',
     '.panel{width:100%;max-height:min(82vh,720px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:var(--bg);color:var(--fg);box-shadow:0 10px 36px rgba(0,0,0,.32);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}',
+    '.panel.ghost-theme{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}',
     '.header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);font-weight:800;cursor:move;touch-action:none;flex:none}',
     '.brand{display:flex;align-items:center;gap:7px;min-width:0}.brand-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.version{font-size:9px;color:var(--muted);font-weight:600}',
     '.header-actions{display:flex;gap:4px;flex:none}',
@@ -207,10 +208,11 @@
   }
   function theme(themeName) {
     state.theme = themeName;
+    panel.classList.toggle('ghost-theme', themeName === 'ghost');
     var themes = {
       dark: { bg: '#171923', fg: '#f8fafc', muted: '#aab2c5', line: 'rgba(255,255,255,.13)', btn: 'rgba(255,255,255,.09)', accent: '#a5b4fc' },
       light: { bg: 'rgba(255,255,255,.98)', fg: '#111827', muted: '#596273', line: 'rgba(0,0,0,.15)', btn: 'rgba(0,0,0,.055)', accent: '#4f46e5' },
-      ghost: { bg: 'rgba(24,24,30,0.0000005)', fg: '#fff', muted: 'rgba(255,255,255,.78)', line: 'rgba(255,255,255,.24)', btn: 'rgba(255,255,255,.14)', accent: '#a5b4fc' }
+      ghost: { bg: 'transparent', fg: '#111827', muted: 'rgba(15,23,42,.82)', line: 'rgba(15,23,42,.24)', btn: 'rgba(15,23,42,.08)', accent: '#4f46e5' }
     };
     var p = themes[themeName] || themes.dark;
     Object.keys(p).forEach(function (key) { host.style.setProperty('--' + key, p[key]); });
